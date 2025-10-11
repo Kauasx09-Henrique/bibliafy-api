@@ -1,4 +1,6 @@
 require('dotenv').config();
+const db = require('./src/config/database'); // caminho para o seu db.js
+
 
 const express = require('express');
 const cors = require('cors');
