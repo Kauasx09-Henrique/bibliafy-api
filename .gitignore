@@ -6,3 +6,6 @@
 
 # Logs
 npm-debug.log
+
+# Pasta do front-end
+/bibliafy-frontend

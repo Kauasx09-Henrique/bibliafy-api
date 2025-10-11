@@ -79,5 +79,4 @@ async function seedDatabase() {
     console.log('🔌 Conexão com o banco de dados fechada.');
   }
 }
-
 seedDatabase();
