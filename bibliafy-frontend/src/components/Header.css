@@ -1,0 +1,64 @@
+.app-header {
+  background-color: var(--borders);
+  border-bottom: 1px solid var(--highlight);
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 70px;
+}
+
+.header-logo {
+  font-family: var(--font-main);
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-greeting {
+  color: var(--text-secondary);
+  display: none; /* Escondido em telas pequenas */
+}
+
+@media (min-width: 768px) {
+  .user-greeting {
+    display: inline; /* Aparece em telas maiores */
+  }
+}
+
+.nav-icon-button {
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+.nav-icon-button:hover {
+  color: var(--text-primary);
+}
+
+.logout-button {
+  background: none;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.logout-button:hover {
+  background-color: var(--highlight);
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}

@@ -1,0 +1,388 @@
+/* Variáveis CSS para temas */
+:root {
+    --transition: all 0.3s ease;
+    --border-radius: 12px;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Container principal */
+.chapter-container {
+    min-height: 100vh;
+    padding: 1rem;
+    transition: var(--transition);
+    position: relative;
+}
+
+/* --- TEMAS AJUSTADOS PARA A PALETA DO APP --- */
+.theme-light {
+    background: #f0f2f5;
+    color: #1c1e21;
+    --text-primary: #1c1e21;
+    --text-secondary: #65676b;
+    --accent-color: #007BFF;
+    /* Azul para contraste */
+    --hover-bg: rgba(0, 0, 0, 0.05);
+}
+
+.theme-dark {
+    /* Usando as variáveis globais que definimos no index.css */
+    background: var(--background);
+    color: var(--text-primary);
+    --text-primary: var(--text-primary);
+    --text-secondary: var(--text-secondary);
+    --accent-color: var(--text-secondary);
+    /* Cinza claro como cor de destaque */
+    --hover-bg: var(--borders);
+}
+
+.theme-sepia {
+    background: #FBF0D9;
+    color: #5B4636;
+    --text-primary: #5B4636;
+    --text-secondary: #8b7355;
+    --accent-color: #8d6e63;
+    --hover-bg: rgba(0, 0, 0, 0.05);
+}
+
+/* --- O RESTO DO SEU CÓDIGO PERMANECE IGUAL --- */
+
+/* Classes de fonte */
+.font-garamond {
+    font-family: 'EB Garamond', serif;
+}
+
+.font-lato {
+    font-family: 'Lato', sans-serif;
+}
+
+.font-merriweather {
+    font-family: 'Merriweather', serif;
+}
+
+.font-roboto-slab {
+    font-family: 'Roboto Slab', serif;
+}
+
+.font-source-sans {
+    font-family: 'Source Sans 3', sans-serif;
+}
+
+/* Header melhorado */
+.chapter-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem 1rem 1rem;
+    position: relative;
+}
+
+.chapter-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: var(--font-main);
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    /* Simplificado para usar a cor do tema */
+}
+
+.chapter-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+/* Opções de Leitura - Redesign completo */
+.reading-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    /* Efeito translúcido fica bom com a nossa paleta */
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--highlight);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.option-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.option-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+/* Botões de tema melhorados */
+.theme-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.theme-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.theme-btn.active::before {
+    opacity: 1;
+}
+
+.theme-btn.light {
+    background: #f0f2f5;
+    color: #65676b;
+}
+
+.theme-btn.dark {
+    background: #0D0D0D;
+    color: #333333;
+}
+
+.theme-btn.sepia {
+    background: #FBF0D9;
+    color: #8d6e63;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Controles de fonte melhorados */
+.font-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.font-select {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    min-width: 150px;
+    transition: var(--transition);
+}
+
+.font-select option {
+    background: var(--background);
+    /* Garante que as opções tenham o fundo escuro */
+    color: var(--text-primary);
+}
+
+
+.font-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px var(--hover-bg);
+}
+
+/* Controle de tamanho de fonte */
+.font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.font-size-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--text-secondary);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.font-size-btn:hover {
+    background: var(--hover-bg);
+    border-color: var(--accent-color);
+}
+
+.font-size-display {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* Lista de versículos melhorada */
+.verses-list {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    padding: 0 1rem;
+}
+
+.verse-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+}
+
+.verse-item:hover {
+    background: var(--hover-bg);
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.verse-text {
+    flex: 1;
+    margin: 0;
+    font-size: inherit;
+    text-align: justify;
+}
+
+.verse-number {
+    font-size: 0.75em;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-right: 0.75rem;
+    position: relative;
+    top: -0.2em;
+    background: var(--hover-bg);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    min-width: 24px;
+    text-align: center;
+    display: inline-block;
+}
+
+/* Ações dos versículos */
+.verse-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+.verse-item:hover .verse-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--text-secondary);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn:hover {
+    background: var(--accent-color);
+    color: var(--background);
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.action-btn.active {
+    color: #f6e05e;
+    border-color: #f6e05e;
+}
+
+/* Loading state melhorado */
+.loading-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .chapter-header h1 {
+        font-size: 2rem;
+    }
+
+    .reading-options {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .option-group {
+        justify-content: center;
+    }
+
+    .verses-list {
+        padding: 0 0.5rem;
+    }
+
+    .verse-item {
+        padding: 1rem;
+        flex-direction: column;
+    }
+
+    .verse-actions {
+        margin-left: 0;
+        margin-top: 1rem;
+        align-self: flex-end;
+        opacity: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .chapter-container {
+        padding: 0.5rem;
+    }
+
+    .font-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .font-select {
+        min-width: auto;
+    }
+}
+/* Adiciona a cor amarela ao botão de favorito quando ativo */
+.action-btn.active {
+  color: #f6e05e; /* Amarelo para a estrela */
+  border-color: #f6e05e;
+}

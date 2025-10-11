@@ -1,0 +1,41 @@
+.book-container {
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.book-container h1 {
+  font-family: var(--font-main);
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--highlight);
+  padding-bottom: 1rem;
+}
+
+.chapters-grid {
+  display: grid;
+  /* Cria um grid responsivo de capítulos */
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 1rem;
+}
+
+.chapter-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--borders);
+  border: 1px solid var(--highlight);
+  border-radius: 8px;
+  height: 60px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+}
+
+.chapter-link:hover {
+  background-color: var(--highlight);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}

@@ -1,0 +1,166 @@
+.home-container {
+  padding: 1.5rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-container h1 {
+  font-family: var(--font-main);
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* --- ESTILOS DA BARRA DE PESQUISA --- */
+.search-container {
+  margin-bottom: 2.5rem;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--highlight);
+  background-color: var(--borders);
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+.search-bar:focus {
+  outline: none;
+  border-color: var(--text-secondary);
+}
+
+/* --- ESTILOS DAS SEÇÕES E TÍTULOS --- */
+.testament-section {
+  margin-bottom: 3rem;
+}
+
+.testament-section h2 {
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--highlight);
+  padding-bottom: 0.8rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none; /* Impede que o texto seja selecionado ao clicar */
+}
+
+/* Ícone de seta para abrir/fechar */
+.arrow-icon {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+.arrow-icon.open {
+  transform: rotate(180deg);
+}
+
+.books-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.book-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.book-card {
+  background-color: var(--borders);
+  padding: 1.2rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--highlight);
+  transition: transform 0.2s ease-in-out, background-color 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.book-card:hover {
+  transform: translateX(5px);
+  background-color: var(--highlight);
+}
+
+.book-card h3 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.book-card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.book-card.new-testament {
+  border-left-color: var(--text-primary);
+}
+
+@media (min-width: 768px) {
+  .books-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .book-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1.5rem;
+  }
+  .book-card:hover {
+    transform: translateY(-5px) translateX(0);
+  }
+}
+
+.loading-message, .error-message-home {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 4rem;
+}/* --- ESTILOS PARA O VERSÍCULO DO DIA --- */
+.verse-of-the-day {
+  background-color: var(--borders);
+  border: 1px solid var(--highlight);
+  border-radius: var(--border-radius, 12px);
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  text-align: center;
+}
+
+.verse-of-the-day-text {
+  font-family: var(--font-main);
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.verse-of-the-day-ref {
+  font-weight: bold;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.refresh-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: transform 0.5s ease, color 0.3s;
+}
+
+.refresh-btn:hover {
+  transform: rotate(180deg);
+  color: var(--text-primary);
+}

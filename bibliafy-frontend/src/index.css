@@ -1,0 +1,35 @@
+/* Importação da fonte do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+/* Importação das fontes do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3&display=swap');
+
+/* ... o resto do seu CSS continua aqui ... */
+/* Definição das variáveis de cor com a sua paleta */
+:root {
+  --background: #0D0D0D;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B3B3B3;
+  --highlight: #333333;
+  --borders: #1A1A1A;
+
+  --font-main: 'Cinzel', serif;
+  --font-body: sans-serif;
+}
+
+/* Estilos globais */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}

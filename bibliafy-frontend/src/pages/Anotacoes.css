@@ -1,0 +1,86 @@
+.anotacoes-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+.anotacoes-container h1 {
+  font-family: var(--font-main);
+  font-size: 2.2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--highlight);
+  padding-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.note-card {
+  background-color: var(--borders);
+  border-left: 4px solid var(--accent-color);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.note-title {
+  font-family: var(--font-main);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.note-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.note-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.3rem;
+}
+.note-action-btn:hover {
+  color: var(--text-primary);
+}
+
+.note-content {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap; /* Preserva as quebras de linha do usuário */
+}
+
+.verse-quote {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--background);
+  border-radius: 8px;
+}
+
+.verse-quote-text {
+  font-style: italic;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.verse-quote-ref {
+  font-weight: bold;
+  color: var(--text-primary);
+  text-align: right;
+  display: block;
+}
