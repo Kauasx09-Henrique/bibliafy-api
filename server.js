@@ -8,6 +8,8 @@ const bibleRoutes = require('./src/routes/bible.routes');
 const notesRoutes = require('./src/routes/notes.routes');
 const favoritesRoutes = require('./src/routes/favorites.routes');
 
+
+
 const app = express();
 const PORT = process.env.PORT || 3333;
 
@@ -19,6 +21,24 @@ app.get('/', (req, res) => {
     message: '🚀 API do Bibliafy está no ar!',
     author: 'Kauã Henrique'
   });
+});
+app.get('/check-books', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM books LIMIT 5');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint para checar versículos
+app.get('/check-verses', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM verse LIMIT 5');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.use('/api/users', userRoutes);
