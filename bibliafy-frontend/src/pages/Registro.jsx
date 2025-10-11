@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Auth.css'; // Caminho atualizado
 
-// ... (o restante do código permanece o mesmo)
 function Registro() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

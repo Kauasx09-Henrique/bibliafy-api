@@ -4,13 +4,15 @@ import api from '../services/api';
 import Swal from 'sweetalert2';
 import './Perfil.css';
 
+
+
 function Perfil() {
   const { user, token, logout } = useAuth();
   const [favorites, setFavorites] = useState([]);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Estados para o formulário de edição
+
   const [editName, setEditName] = useState(user?.name || '');
   const [editPassword, setEditPassword] = useState('');
 
