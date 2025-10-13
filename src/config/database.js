@@ -7,14 +7,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 const { Pool } = require('pg');
 
-// A configuração ÚNICA e correta que usa a DATABASE_URL
-// A biblioteca 'pg' sabe como extrair o host, user, password, etc. daqui
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // Essencial para a Render
+    require: true,
+    rejectUnauthorized: false
   }
 });
+
 
 // Testa a conexão (seu código de teste aqui é ótimo!)
 pool.connect((err, client, release) => {
