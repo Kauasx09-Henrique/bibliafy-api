@@ -5,19 +5,20 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const { Pool } = require('pg');
+// Ignora verificação de certificado SSL autoassinado
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     require: true,
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false, // Mantém compatibilidade
+  },
 });
 
-
-// Testa a conexão (seu código de teste aqui é ótimo!)
+// Testa a conexão
 pool.connect((err, client, release) => {
   if (err) {
     return console.error('❌ Erro ao conectar com o banco de dados:', err.stack);
