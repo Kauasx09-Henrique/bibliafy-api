@@ -79,7 +79,7 @@ exports.login = async (req, res) => {
 // Adicione esta função ao final de src/controllers/users.controller.js
 
 exports.updateProfile = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.userId; // Vem do middleware de autenticação
   const { name, password } = req.body;
 
   if (!name) {
