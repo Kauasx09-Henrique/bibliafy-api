@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 // ✅ CORREÇÃO: O caminho correto é '../' e o nome do arquivo é 'bibleController'
-const bibleController = require('../controllers/bibleController');
+const bibleController = require('../../src/controllers/bible.controller');
 
 // Rota para a raiz da API (opcional)
 router.get('/', (req, res) => {
