@@ -7,7 +7,7 @@ const cors = require('cors');
 
 // ✅ CORREÇÃO: Caminhos ajustados para a localização do server.js
 const userRoutes = require('./src/routes/users.routes');
-const bibleRoutes = require('./src/routes/bibleRoutes');
+const bibleRoutes = require('./src/routes/bible.routes');
 const notesRoutes = require('./src/routes/notes.routes');
 const favoritesRoutes = require('./src/routes/favorites.routes');
 
