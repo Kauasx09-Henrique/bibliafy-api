@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 // CORREÇÃO APLICADA AQUI 👇
 // A primeira linha deve ser esta:
-const bibleController = require('../controllers/bibleController');
+const bibleController = require('../../src/controllers/bible.controller');
 // Rota para a raiz da API (opcional)
 router.get('/', (req, res) => {
   res.status(200).send({
