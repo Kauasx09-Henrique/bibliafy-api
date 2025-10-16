@@ -1,14 +1,15 @@
 require('dotenv').config();
-const db = require('./src/config/database');
+// ✅ CORREÇÃO: Caminho simplificado
+const db = require('./config/database');
 
 const express = require('express');
 const cors = require('cors');
 
-const userRoutes = require('./src/routes/users.routes');
-// ✅ CORREÇÃO: O nome do arquivo aqui é 'bibleRoutes.js'
-const bibleRoutes = require('./src/routes/bibleRoutes');
-const notesRoutes = require('./src/routes/notes.routes');
-const favoritesRoutes = require('./src/routes/favorites.routes');
+// ✅ CORREÇÃO: Caminhos ajustados para a localização do server.js
+const userRoutes = require('./routes/users.routes');
+const bibleRoutes = require('./routes/bibleRoutes');
+const notesRoutes = require('./routes/notes.routes');
+const favoritesRoutes = require('./routes/favorites.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3333;
@@ -41,7 +42,6 @@ app.get('/check-verses', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // Rotas principais da API
 app.use('/api/users', userRoutes);
