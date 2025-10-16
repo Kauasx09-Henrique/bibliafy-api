@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+// CORREÇÃO APLICADA AQUI 👇
 const bibleController = require('../controllers/bible.controller');
 
 // Rota para a raiz da API (opcional)
