@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bibleController = require('../controllers/bibleController');
+const bibleController = require('../controllers/bible.controller');
 
 // Rota para a raiz da API (opcional)
 router.get('/', (req, res) => {
