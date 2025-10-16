@@ -6,10 +6,10 @@ const express = require('express');
 const cors = require('cors');
 
 // ✅ CORREÇÃO: Caminhos ajustados para a localização do server.js
-const userRoutes = require('./routes/users.routes');
-const bibleRoutes = require('./routes/bibleRoutes');
-const notesRoutes = require('./routes/notes.routes');
-const favoritesRoutes = require('./routes/favorites.routes');
+const userRoutes = require('./src/routes/users.routes');
+const bibleRoutes = require('./src/routes/bibleRoutes');
+const notesRoutes = require('./src/routes/notes.routes');
+const favoritesRoutes = require('./src/routes/favorites.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3333;
