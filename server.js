@@ -1,16 +1,14 @@
 require('dotenv').config();
-const db = require('./src/config/database'); // caminho para o seu db.js
-
+const db = require('./src/config/database');
 
 const express = require('express');
 const cors = require('cors');
 
 const userRoutes = require('./src/routes/users.routes');
-const bibleRoutes = require('./src/routes/bible.routes');
+// ✅ CORREÇÃO: O nome do arquivo aqui é 'bibleRoutes.js'
+const bibleRoutes = require('./src/routes/bibleRoutes');
 const notesRoutes = require('./src/routes/notes.routes');
 const favoritesRoutes = require('./src/routes/favorites.routes');
-
-
 
 const app = express();
 const PORT = process.env.PORT || 3333;
@@ -24,6 +22,8 @@ app.get('/', (req, res) => {
     author: 'Kauã Henrique'
   });
 });
+
+// Rotas de teste (pode remover se não precisar mais)
 app.get('/check-books', async (req, res) => {
   try {
     const result = await db.query('SELECT * FROM books LIMIT 5');
@@ -33,16 +33,17 @@ app.get('/check-books', async (req, res) => {
   }
 });
 
-// Endpoint para checar versículos
 app.get('/check-verses', async (req, res) => {
   try {
-    const result = await db.query('SELECT * FROM verse LIMIT 5');
+    const result = await db.query('SELECT * FROM verses LIMIT 5');
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+
+// Rotas principais da API
 app.use('/api/users', userRoutes);
 app.use('/api/bible', bibleRoutes);
 app.use('/api/notes', notesRoutes);
