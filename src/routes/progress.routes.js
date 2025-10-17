@@ -1,6 +1,6 @@
 const express = require('express');
 const ProgressController = require('../controllers/ProgressController');
-const authMiddleware = require('../middlewares/auth'); // <- seu middleware de autenticação
+const authMiddleware = require('../config/middlewares/auth.middleware'); // <- seu middleware de autenticação
 
 const progressRoutes = express.Router();
 
