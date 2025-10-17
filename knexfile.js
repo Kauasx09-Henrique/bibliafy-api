@@ -1,33 +1,27 @@
-// knexfile.js
-const path = require('path');
-require('dotenv').config();
+// Local do arquivo: src/database/migrations/20251017105000_create_reading_progress.js
 
-module.exports = {
-  development: {
-    client: 'pg',
-    connection: process.env.DATABASE_URL,
-    // ESSA PARTE É CRUCIAL PARA O SEU PC
-    ssl: {
-      rejectUnauthorized: false
-    },
-    migrations: {
-      directory: path.resolve(__dirname, 'src', 'database', 'migrations')
-    }
-  },
+exports.up = function (knex) {
+  return knex.schema.createTable('reading_progress', table => {
+    table.increments('id').primary();
 
-  production: {
-    client: 'pg',
-    connection: process.env.DATABASE_URL,
-    // E ESSA PARTE É CRUCIAL PARA A RENDER
-    ssl: {
-      rejectUnauthorized: false
-    },
-    migrations: {
-      directory: path.resolve(__dirname, 'src', 'database', 'migrations')
-    },
-    pool: {
-      min: 2,
-      max: 10
-    }
-  }
+    // MUDANÇA PRINCIPAL AQUI: Trocamos .integer() por .uuid()
+    table.uuid('user_id')
+      .notNullable()
+      .references('id')
+      .inTable('users')
+      .onDelete('CASCADE');
+
+    table.integer('book_id')
+      .notNullable()
+      .references('id')
+      .inTable('books')
+      .onDelete('CASCADE');
+
+    table.json('chapters_read').notNullable().defaultTo('[]');
+    table.unique(['user_id', 'book_id']);
+  });
+};
+
+exports.down = function (knex) {
+  return knex.schema.dropTable('reading_progress');
 };
