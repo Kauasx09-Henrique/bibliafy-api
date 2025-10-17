@@ -3,17 +3,17 @@
 require('dotenv').config();
 
 // ✅ CORREÇÃO: Caminhos simplificados, sem './src/'
-const db = require('./config/database');
+const db = require('./src/config/database');
 const express = require('express');
 const cors = require('cors');
 
 // ✅ CORREÇÃO: Caminhos simplificados para todas as rotas e middlewares
-const userRoutes = require('./routes/users.routes');
-const bibleRoutes = require('./routes/bible.routes');
-const notesRoutes = require('./routes/notes.routes');
-const favoritesRoutes = require('./routes/favorites.routes');
-const authMiddleware = require('./middlewares/auth');
-const progressRoutes = require('./routes/progress.routes');
+const userRoutes = require('./src/routes/users.routes');
+const bibleRoutes = require('./src/routes/bible.routes');
+const notesRoutes = require('./src/routes/notes.routes');
+const favoritesRoutes = require('./src/routes/favorites.routes');
+const authMiddleware = require('./src/config/middlewares/auth.middleware');
+const progressRoutes = require('./src/routes/progress.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3333;
