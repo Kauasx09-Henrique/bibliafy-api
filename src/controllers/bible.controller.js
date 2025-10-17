@@ -104,3 +104,19 @@ exports.getRandomVerse = async (req, res) => {
     res.status(500).send({ message: 'Erro interno do servidor.' });
   }
 };
+// Em: src/controllers/BibleController.js
+
+// ...
+
+exports.getAllBooks = async (req, res) => {
+  try {
+    // ✅ GARANTA QUE SUA LINHA ESTÁ EXATAMENTE ASSIM, COM ", chapters"
+    const { rows } = await db.pool.query('SELECT id, testament_id, name, abbreviation, chapters FROM books ORDER BY id');
+    res.status(200).send(rows);
+  } catch (error) {
+    console.error('Erro ao buscar livros:', error);
+    res.status(500).send({ message: 'Erro interno do servidor.' });
+  }
+};
+
+// ...
