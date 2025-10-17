@@ -1,14 +1,13 @@
-// Em: src/routes/progress.routes.js
-
 const express = require('express');
 const ProgressController = require('../controllers/ProgressController');
+const authMiddleware = require('../middlewares/auth'); // <- seu middleware de autenticação
 
 const progressRoutes = express.Router();
 
-// GET /api/progress -> Busca o progresso do usuário
-progressRoutes.get('/', ProgressController.index);
+// GET /api/progress -> Busca o progresso do usuário (autenticado)
+progressRoutes.get('/', authMiddleware, ProgressController.index);
 
-// POST /api/progress -> Salva o progresso de um capítulo
-progressRoutes.post('/', ProgressController.store);
+// POST /api/progress -> Salva o progresso de um capítulo (autenticado)
+progressRoutes.post('/', authMiddleware, ProgressController.store);
 
 module.exports = progressRoutes;

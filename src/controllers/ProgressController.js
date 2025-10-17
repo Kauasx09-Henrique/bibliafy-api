@@ -1,49 +1,23 @@
-// Em: src/controllers/ProgressController.js
-
-const db = require('../config/database');
-
-/**
- * 📖 Busca todo o progresso de leitura do usuário logado.
- */
-exports.index = async (req, res) => {
-  const user_id = req.userId; // vem do middleware de autenticação
-
-  try {
-    const query = `
-      SELECT 
-        rp.book_id, 
-        rp.chapters_read,
-        b.name AS book_name,
-        COUNT(DISTINCT v.chapter) AS total_chapters
-      FROM reading_progress rp
-      JOIN books b ON b.id = rp.book_id
-      JOIN verses v ON v.book_id = b.id
-      WHERE rp.user_id = $1
-      GROUP BY rp.book_id, b.name, rp.chapters_read
-      ORDER BY rp.book_id;
-    `;
-
-    const { rows } = await db.pool.query(query, [user_id]);
-    res.status(200).send(rows);
-  } catch (error) {
-    console.error('❌ Erro ao buscar progresso:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
-  }
-};
-
-/**
- * ✅ Salva ou atualiza o progresso de leitura de um capítulo.
- */
 exports.store = async (req, res) => {
   const user_id = req.userId;
-  const { book_id, chapter } = req.body;
+  let { book_id, chapter } = req.body;
+
+  if (!user_id) {
+    return res.status(401).json({ message: 'Usuário não autenticado.' });
+  }
 
   if (!book_id || !chapter) {
-    return res.status(400).send({ message: 'É necessário informar o ID do livro e o capítulo.' });
+    return res.status(400).json({ message: 'É necessário informar o ID do livro e o capítulo.' });
+  }
+
+  // Garantir que chapter seja número
+  chapter = Number(chapter);
+  if (isNaN(chapter)) {
+    return res.status(400).json({ message: 'Capítulo inválido.' });
   }
 
   try {
-    // 1️⃣ Busca progresso existente
+    // Busca progresso existente
     const findQuery = `
       SELECT id, chapters_read 
       FROM reading_progress 
@@ -53,8 +27,13 @@ exports.store = async (req, res) => {
     const existing = rows[0];
 
     if (existing) {
-      // 2️⃣ Atualiza registro existente
-      let chapters_read = JSON.parse(existing.chapters_read || '[]');
+      // Atualiza progresso existente
+      let chapters_read = [];
+      try {
+        chapters_read = JSON.parse(existing.chapters_read || '[]');
+      } catch {
+        chapters_read = [];
+      }
 
       if (!chapters_read.includes(chapter)) {
         chapters_read.push(chapter);
@@ -72,12 +51,10 @@ exports.store = async (req, res) => {
         existing.id,
       ]);
 
-      console.log(`✅ Progresso atualizado para user ${user_id}: Livro ${book_id}, Capítulo ${chapter}`);
-
-      res.status(200).send(updatedRows[0]);
+      console.log(`✅ Progresso atualizado: user ${user_id}, livro ${book_id}, capítulo ${chapter}`);
+      return res.status(200).json(updatedRows[0]);
     } else {
-      // 3️⃣ Insere novo registro
-      const newChapters = JSON.stringify([chapter]);
+      // Cria novo registro
       const insertQuery = `
         INSERT INTO reading_progress (user_id, book_id, chapters_read)
         VALUES ($1, $2, $3)
@@ -86,15 +63,14 @@ exports.store = async (req, res) => {
       const { rows: insertedRows } = await db.pool.query(insertQuery, [
         user_id,
         book_id,
-        newChapters,
+        JSON.stringify([chapter]),
       ]);
 
-      console.log(`🆕 Novo progresso criado para user ${user_id}: Livro ${book_id}, Capítulo ${chapter}`);
-
-      res.status(201).send(insertedRows[0]);
+      console.log(`🆕 Novo progresso criado: user ${user_id}, livro ${book_id}, capítulo ${chapter}`);
+      return res.status(201).json(insertedRows[0]);
     }
   } catch (error) {
-    console.error('❌ Erro ao salvar progresso:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
+    console.error('❌ Erro ao salvar progresso:', error.message);
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
