@@ -5,12 +5,10 @@ const ProgressController = require('../controllers/ProgressController');
 
 const progressRoutes = express.Router();
 
-// Rota para BUSCAR o progresso do usuário logado
-// GET -> /api/progress/
+// GET /api/progress -> Busca o progresso do usuário
 progressRoutes.get('/', ProgressController.index);
 
-// Rota para SALVAR um capítulo como lido
-// POST -> /api/progress/
+// POST /api/progress -> Salva o progresso de um capítulo
 progressRoutes.post('/', ProgressController.store);
 
 module.exports = progressRoutes;
