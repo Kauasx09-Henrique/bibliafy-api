@@ -1,6 +1,8 @@
 const db = require('../config/database');
 
-// ✅ LISTAR TODAS AS VERSÕES DISPONÍVEIS
+/**
+ * LISTAR TODAS AS VERSÕES DISPONÍVEIS
+ */
 exports.getAllVersions = async (req, res) => {
   try {
     const { rows } = await db.pool.query(
@@ -13,12 +15,24 @@ exports.getAllVersions = async (req, res) => {
   }
 };
 
-// ✅ LISTAR TODOS OS LIVROS (SEM CHAPTERS)
+/**
+ * LISTAR TODOS OS LIVROS COM TOTAL DE CAPÍTULOS
+ */
 exports.getAllBooks = async (req, res) => {
   try {
-    const { rows } = await db.pool.query(
-      'SELECT id, testament_id, name, abbreviation FROM books ORDER BY id'
-    );
+    const query = `
+      SELECT 
+        b.id,
+        b.testament_id,
+        b.name,
+        b.abbreviation,
+        COUNT(DISTINCT v.chapter) AS total_chapters
+      FROM books b
+      LEFT JOIN verses v ON v.book_id = b.id
+      GROUP BY b.id, b.testament_id, b.name, b.abbreviation
+      ORDER BY b.id;
+    `;
+    const { rows } = await db.pool.query(query);
     res.status(200).send(rows);
   } catch (error) {
     console.error('Erro ao buscar livros:', error);
@@ -26,7 +40,9 @@ exports.getAllBooks = async (req, res) => {
   }
 };
 
-// ✅ LISTAR TODOS OS CAPÍTULOS DE UM LIVRO
+/**
+ * LISTAR TODOS OS CAPÍTULOS DE UM LIVRO
+ */
 exports.getChaptersByBook = async (req, res) => {
   const { book_id } = req.params;
   try {
@@ -42,10 +58,12 @@ exports.getChaptersByBook = async (req, res) => {
   }
 };
 
-// ✅ LISTAR VERSÍCULOS DE UM CAPÍTULO (FILTRANDO POR VERSÃO)
+/**
+ * LISTAR VERSÍCULOS DE UM CAPÍTULO (FILTRANDO POR VERSÃO)
+ */
 exports.getVersesByChapter = async (req, res) => {
   const { book_id, chapter } = req.params;
-  const { version = 'NVI' } = req.query; // padrão = NVI
+  const { version = 'NVI' } = req.query;
 
   try {
     const query = `
@@ -72,7 +90,9 @@ exports.getVersesByChapter = async (req, res) => {
   }
 };
 
-// ✅ VERSÍCULO ALEATÓRIO (FILTRANDO POR VERSÃO)
+/**
+ * VERSÍCULO ALEATÓRIO (FILTRANDO POR VERSÃO)
+ */
 exports.getRandomVerse = async (req, res) => {
   const { version = 'NVI' } = req.query;
 

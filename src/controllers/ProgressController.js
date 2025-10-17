@@ -1,26 +1,38 @@
 // Em: src/controllers/ProgressController.js
 
-// Usa a mesma conexão com o banco de dados do seu BibleController
-const db = require('../config/database'); // Verifique se este é o caminho correto para sua conexão
+const db = require('../config/database');
 
 /**
- * Busca todo o progresso de leitura do usuário logado.
+ * 📖 Busca todo o progresso de leitura do usuário logado.
  */
 exports.index = async (req, res) => {
-  const user_id = req.userId; // O ID do usuário vem do seu middleware de autenticação
+  const user_id = req.userId; // vem do middleware de autenticação
 
   try {
-    const query = 'SELECT book_id, chapters_read FROM reading_progress WHERE user_id = $1';
+    const query = `
+      SELECT 
+        rp.book_id, 
+        rp.chapters_read,
+        b.name AS book_name,
+        COUNT(DISTINCT v.chapter) AS total_chapters
+      FROM reading_progress rp
+      JOIN books b ON b.id = rp.book_id
+      JOIN verses v ON v.book_id = b.id
+      WHERE rp.user_id = $1
+      GROUP BY rp.book_id, b.name, rp.chapters_read
+      ORDER BY rp.book_id;
+    `;
+
     const { rows } = await db.pool.query(query, [user_id]);
     res.status(200).send(rows);
   } catch (error) {
-    console.error('Erro ao buscar progresso:', error);
+    console.error('❌ Erro ao buscar progresso:', error);
     res.status(500).send({ message: 'Erro interno do servidor.' });
   }
 };
 
 /**
- * Salva ou atualiza o progresso de leitura de um capítulo.
+ * ✅ Salva ou atualiza o progresso de leitura de um capítulo.
  */
 exports.store = async (req, res) => {
   const user_id = req.userId;
@@ -31,33 +43,58 @@ exports.store = async (req, res) => {
   }
 
   try {
-    // 1. Tenta encontrar um registro de progresso existente
-    const findQuery = 'SELECT id, chapters_read FROM reading_progress WHERE user_id = $1 AND book_id = $2';
+    // 1️⃣ Busca progresso existente
+    const findQuery = `
+      SELECT id, chapters_read 
+      FROM reading_progress 
+      WHERE user_id = $1 AND book_id = $2
+    `;
     const { rows } = await db.pool.query(findQuery, [user_id, book_id]);
-    const existingProgress = rows[0];
+    const existing = rows[0];
 
-    if (existingProgress) {
-      // 2a. Se existe, ATUALIZA o registro
-      const chapters_read = JSON.parse(existingProgress.chapters_read);
+    if (existing) {
+      // 2️⃣ Atualiza registro existente
+      let chapters_read = JSON.parse(existing.chapters_read || '[]');
+
       if (!chapters_read.includes(chapter)) {
         chapters_read.push(chapter);
-        chapters_read.sort((a, b) => a - b); // Mantém a ordem
+        chapters_read.sort((a, b) => a - b);
       }
 
-      const updateQuery = 'UPDATE reading_progress SET chapters_read = $1 WHERE id = $2 RETURNING book_id, chapters_read';
-      const { rows: updatedRows } = await db.pool.query(updateQuery, [JSON.stringify(chapters_read), existingProgress.id]);
-      
+      const updateQuery = `
+        UPDATE reading_progress 
+        SET chapters_read = $1 
+        WHERE id = $2 
+        RETURNING book_id, chapters_read
+      `;
+      const { rows: updatedRows } = await db.pool.query(updateQuery, [
+        JSON.stringify(chapters_read),
+        existing.id,
+      ]);
+
+      console.log(`✅ Progresso atualizado para user ${user_id}: Livro ${book_id}, Capítulo ${chapter}`);
+
       res.status(200).send(updatedRows[0]);
     } else {
-      // 2b. Se não existe, INSERE um novo registro
+      // 3️⃣ Insere novo registro
       const newChapters = JSON.stringify([chapter]);
-      const insertQuery = 'INSERT INTO reading_progress (user_id, book_id, chapters_read) VALUES ($1, $2, $3) RETURNING book_id, chapters_read';
-      const { rows: insertedRows } = await db.pool.query(insertQuery, [user_id, book_id, newChapters]);
+      const insertQuery = `
+        INSERT INTO reading_progress (user_id, book_id, chapters_read)
+        VALUES ($1, $2, $3)
+        RETURNING book_id, chapters_read
+      `;
+      const { rows: insertedRows } = await db.pool.query(insertQuery, [
+        user_id,
+        book_id,
+        newChapters,
+      ]);
+
+      console.log(`🆕 Novo progresso criado para user ${user_id}: Livro ${book_id}, Capítulo ${chapter}`);
 
       res.status(201).send(insertedRows[0]);
     }
   } catch (error) {
-    console.error('Erro ao salvar progresso:', error);
+    console.error('❌ Erro ao salvar progresso:', error);
     res.status(500).send({ message: 'Erro interno do servidor.' });
   }
 };
