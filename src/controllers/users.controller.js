@@ -3,35 +3,39 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, nickname, logo_url } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
+  if (!name || !email || !password || !nickname) {
+    return res.status(400).json({ message: 'Preencha todos os campos obrigatórios.' });
   }
 
   try {
-    const { rows: existingUsers } = await db.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (existingUsers.length > 0) {
+    const emailExists = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (emailExists.rows.length > 0) {
       return res.status(409).json({ message: 'Este e-mail já está em uso.' });
+    }
+
+    const nicknameExists = await db.query('SELECT id FROM users WHERE nickname = $1', [nickname]);
+    if (nicknameExists.rows.length > 0) {
+      return res.status(409).json({ message: 'Este apelido já está em uso.' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const { rows: newUserRows } = await db.query(
-      'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, created_at',
-      [name, email, passwordHash]
+    const { rows } = await db.query(
+      `INSERT INTO users (name, email, password_hash, nickname, logo_url, role, is_active)
+       VALUES ($1, $2, $3, $4, $5, 'user', true)
+       RETURNING id, name, email, nickname, logo_url, role, is_active, created_at`,
+      [name, email, passwordHash, nickname, logo_url || null]
     );
-
-    const newUser = newUserRows[0];
 
     return res.status(201).json({
       message: 'Usuário criado com sucesso!',
-      user: newUser,
+      user: rows[0]
     });
 
   } catch (error) {
-    console.error('Erro no registro:', error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
@@ -40,74 +44,83 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
+    return res.status(400).json({ message: 'Preencha todos os campos.' });
   }
 
   try {
-    const { rows: userRows } = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (userRows.length === 0) {
+    const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (rows.length === 0) {
       return res.status(401).json({ message: 'Credenciais inválidas.' });
     }
 
-    const user = userRows[0];
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isPasswordMatch) {
+    if (!match) {
       return res.status(401).json({ message: 'Credenciais inválidas.' });
     }
 
-    const payload = { id: user.id, name: user.name };
     const token = jwt.sign(
-      payload,
+      { id: user.id, name: user.name },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '5d' }
     );
-    
+
     delete user.password_hash;
 
     return res.status(200).json({
       message: 'Login bem-sucedido!',
       user,
-      token,
+      token
     });
 
   } catch (error) {
-    console.error('Erro no login:', error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
-// Adicione esta função ao final de src/controllers/users.controller.js
 
 exports.updateProfile = async (req, res) => {
-  const userId = req.userId; // Vem do middleware de autenticação
-  const { name, password } = req.body;
+  const userId = req.userId;
+  const { name, password, nickname, logo_url } = req.body;
 
-  if (!name) {
-    return res.status(400).json({ message: 'O nome é obrigatório.' });
+  if (!name && !password && !nickname && !logo_url) {
+    return res.status(400).json({ message: 'Envie um dado para atualizar.' });
   }
 
   try {
-    // Se uma nova senha foi enviada, criptografa ela
+    if (nickname) {
+      const nicknameExists = await db.query(
+        'SELECT id FROM users WHERE nickname = $1 AND id <> $2',
+        [nickname, userId]
+      );
+
+      if (nicknameExists.rows.length > 0) {
+        return res.status(409).json({ message: 'Este apelido já está em uso.' });
+      }
+    }
+
+    let passwordHash = null;
     if (password) {
       const salt = await bcrypt.genSalt(10);
-      const passwordHash = await bcrypt.hash(password, salt);
-      
-      await db.query(
-        'UPDATE users SET name = $1, password_hash = $2, updated_at = NOW() WHERE id = $3',
-        [name, passwordHash, userId]
-      );
-    } else {
-      // Se não, atualiza apenas o nome
-      await db.query(
-        'UPDATE users SET name = $1, updated_at = NOW() WHERE id = $2',
-        [name, userId]
-      );
+      passwordHash = await bcrypt.hash(password, salt);
     }
+
+    await db.query(
+      `
+      UPDATE users SET 
+        name = COALESCE($1, name),
+        nickname = COALESCE($2, nickname),
+        logo_url = COALESCE($3, logo_url),
+        password_hash = COALESCE($4, password_hash),
+        updated_at = NOW()
+      WHERE id = $5
+      `,
+      [name || null, nickname || null, logo_url || null, passwordHash, userId]
+    );
 
     return res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
 
   } catch (error) {
-    console.error('Erro ao atualizar perfil:', error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };

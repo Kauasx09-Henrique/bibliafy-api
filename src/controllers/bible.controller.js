@@ -1,23 +1,16 @@
 const db = require('../config/database');
 
-/**
- * LISTAR TODAS AS VERSÕES DISPONÍVEIS
- */
 exports.getAllVersions = async (req, res) => {
   try {
-    const { rows } = await db.pool.query(
+    const { rows } = await db.query(
       'SELECT id, abbreviation, name FROM versions ORDER BY id'
     );
-    res.status(200).send(rows);
+    return res.status(200).json(rows);
   } catch (error) {
-    console.error('Erro ao buscar versões:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
 
-/**
- * LISTAR TODOS OS LIVROS COM TOTAL DE CAPÍTULOS
- */
 exports.getAllBooks = async (req, res) => {
   try {
     const query = `
@@ -32,35 +25,26 @@ exports.getAllBooks = async (req, res) => {
       GROUP BY b.id, b.testament_id, b.name, b.abbreviation
       ORDER BY b.id;
     `;
-    const { rows } = await db.pool.query(query);
-    res.status(200).send(rows);
+    const { rows } = await db.query(query);
+    return res.status(200).json(rows);
   } catch (error) {
-    console.error('Erro ao buscar livros:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
 
-/**
- * LISTAR TODOS OS CAPÍTULOS DE UM LIVRO
- */
 exports.getChaptersByBook = async (req, res) => {
   const { book_id } = req.params;
   try {
-    const { rows } = await db.pool.query(
+    const { rows } = await db.query(
       'SELECT DISTINCT chapter FROM verses WHERE book_id = $1 ORDER BY chapter',
       [book_id]
     );
-    const chapters = rows.map(row => row.chapter);
-    res.status(200).send(chapters);
+    return res.status(200).json(rows.map(r => r.chapter));
   } catch (error) {
-    console.error('Erro ao buscar capítulos:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
 
-/**
- * LISTAR VERSÍCULOS DE UM CAPÍTULO (FILTRANDO POR VERSÃO)
- */
 exports.getVersesByChapter = async (req, res) => {
   const { book_id, chapter } = req.params;
   const { version = 'NVI' } = req.query;
@@ -75,24 +59,18 @@ exports.getVersesByChapter = async (req, res) => {
         AND ver.abbreviation = $3
       ORDER BY v.verse;
     `;
-    const { rows } = await db.pool.query(query, [book_id, chapter, version]);
+    const { rows } = await db.query(query, [book_id, chapter, version]);
 
     if (rows.length === 0) {
-      return res
-        .status(404)
-        .send({ message: 'Capítulo não encontrado para esta versão.' });
+      return res.status(404).json({ message: 'Capítulo não encontrado para esta versão.' });
     }
 
-    res.status(200).send(rows);
+    return res.status(200).json(rows);
   } catch (error) {
-    console.error('Erro ao buscar versículos:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
 
-/**
- * VERSÍCULO ALEATÓRIO (FILTRANDO POR VERSÃO)
- */
 exports.getRandomVerse = async (req, res) => {
   const { version = 'NVI' } = req.query;
 
@@ -110,17 +88,14 @@ exports.getRandomVerse = async (req, res) => {
       ORDER BY RANDOM()
       LIMIT 1;
     `;
-    const { rows } = await db.pool.query(query, [version]);
+    const { rows } = await db.query(query, [version]);
 
     if (rows.length === 0) {
-      return res
-        .status(404)
-        .send({ message: 'Nenhum versículo encontrado para a versão especificada.' });
+      return res.status(404).json({ message: 'Nenhum versículo encontrado para a versão especificada.' });
     }
 
-    res.status(200).send(rows[0]);
+    return res.status(200).json(rows[0]);
   } catch (error) {
-    console.error('Erro ao buscar versículo aleatório:', error);
-    res.status(500).send({ message: 'Erro interno do servidor.' });
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
