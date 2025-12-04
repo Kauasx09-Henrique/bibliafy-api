@@ -5,13 +5,15 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 const transport = nodemailer.createTransport({
-  host: process.env.MAIL_HOST || "sandbox.smtp.mailtrap.io",
-  port: process.env.MAIL_PORT || 2525,
+  host: process.env.MAIL_HOST || "smtp.gmail.com",
+  port: process.env.MAIL_PORT || 587,
+  secure: false, // TLS
   auth: {
-    user: process.env.MAIL_USER || "562018581953b2", 
-    pass: process.env.MAIL_PASS || "f547b342bafa5c"
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS  // senha de app (não a senha normal)
   }
 });
+
 
 exports.register = async (req, res) => {
   const { name, email, password, nickname, logo_url } = req.body;
@@ -175,9 +177,9 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const token = crypto.randomBytes(20).toString('hex');
-    
+
     const now = new Date();
-    now.setHours(now.getHours() + 1); 
+    now.setHours(now.getHours() + 1);
 
     await db.query(
       'UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE id = $3',
@@ -187,19 +189,24 @@ exports.forgotPassword = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     await transport.sendMail({
-      to: email,
+      to: email,              // <- vem do req.body.email
       from: 'noreply@bibliafy.com',
       subject: 'Recuperação de Senha - Bibliafy',
       html: `
-        <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2>Olá, ${user.rows[0].name}</h2>
-          <p>Você solicitou a recuperação de senha.</p>
-          <p>Clique no link abaixo para criar uma nova senha:</p>
-          <a href="${frontendUrl}/reset-password?token=${token}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Recuperar Senha</a>
-          <p>O link expira em 1 hora.</p>
-        </div>
-      `,
+  <div style="font-family: Arial, sans-serif; color: #333;">
+    <h2>Olá, ${user.rows[0].name}</h2>
+    <p>Recebemos uma solicitação para redefinir a senha da conta ligada a este e-mail: <strong>${email}</strong>.</p>
+    <p>Clique no botão abaixo para criar uma nova senha:</p>
+    <a href="${frontendUrl}/reset-password?token=${token}" 
+       style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+      Redefinir senha
+    </a>
+    <p>Este link é válido por <strong>1 hora</strong>. Se você não solicitou, pode ignorar este e-mail.</p>
+  </div>
+`,
+
     });
+
 
     return res.status(200).json({ message: 'Email enviado com sucesso.' });
 
