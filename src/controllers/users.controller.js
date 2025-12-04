@@ -5,11 +5,11 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 const transport = nodemailer.createTransport({
-  host: "smtp.mailtrap.io",
-  port: 2525,
+  host: process.env.MAIL_HOST || "sandbox.smtp.mailtrap.io",
+  port: process.env.MAIL_PORT || 2525,
   auth: {
-   user: "562018581953b2", 
-    pass: "f547b342bafa5c"
+    user: process.env.MAIL_USER || "562018581953b2", 
+    pass: process.env.MAIL_PASS || "f547b342bafa5c"
   }
 });
 
@@ -184,16 +184,20 @@ exports.forgotPassword = async (req, res) => {
       [token, now, user.rows[0].id]
     );
 
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
     await transport.sendMail({
       to: email,
       from: 'noreply@bibliafy.com',
       subject: 'Recuperação de Senha - Bibliafy',
       html: `
-        <p>Olá, ${user.rows[0].name}</p>
-        <p>Você solicitou a recuperação de senha.</p>
-        <p>Clique no link abaixo para criar uma nova senha:</p>
-        <a href="http://localhost:5173/reset-password/${token}">Recuperar Senha</a>
-        <p>O link expira em 1 hora.</p>
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>Olá, ${user.rows[0].name}</h2>
+          <p>Você solicitou a recuperação de senha.</p>
+          <p>Clique no link abaixo para criar uma nova senha:</p>
+          <a href="${frontendUrl}/reset-password?token=${token}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Recuperar Senha</a>
+          <p>O link expira em 1 hora.</p>
+        </div>
       `,
     });
 
