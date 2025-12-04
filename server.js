@@ -9,6 +9,8 @@ const notesRoutes = require('./src/routes/notes.routes');
 const favoritesRoutes = require('./src/routes/favorites.routes');
 const authMiddleware = require('./src/config/middlewares/auth.middleware');
 
+
+
 const app = express();
 const PORT = process.env.PORT || 3333;
 
@@ -27,6 +29,7 @@ app.use('/api/bible', bibleRoutes);
 
 app.use('/api/notes', authMiddleware, notesRoutes);
 app.use('/api/favorites', authMiddleware, favoritesRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`🔥 Servidor rodando na porta ${PORT}`);
