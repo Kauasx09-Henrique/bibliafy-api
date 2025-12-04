@@ -66,12 +66,15 @@ exports.login = async (req, res) => {
       { expiresIn: '5d' }
     );
 
+    const needsNickname = !user.nickname;
+
     delete user.password_hash;
 
     return res.status(200).json({
       message: 'Login bem-sucedido!',
       user,
-      token
+      token,
+      needsNickname
     });
 
   } catch (error) {
@@ -120,6 +123,31 @@ exports.updateProfile = async (req, res) => {
 
     return res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
 
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
+};
+
+exports.checkNickname = async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const { rows } = await db.query(
+      'SELECT id, name, email, nickname FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    const user = rows[0];
+
+    return res.status(200).json({
+      hasNickname: !!user.nickname,
+      nickname: user.nickname || null,
+      suggestedNickname: user.nickname || user.name || user.email
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
