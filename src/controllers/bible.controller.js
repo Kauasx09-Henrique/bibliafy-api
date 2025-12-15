@@ -98,4 +98,34 @@ exports.getRandomVerse = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
+}
+// ... (seus outros exports acima)
+
+exports.getBookById = async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const query = `
+      SELECT 
+        b.id,
+        b.testament_id,
+        b.name,
+        b.abbreviation,
+        COUNT(DISTINCT v.chapter) AS total_chapters
+      FROM books b
+      LEFT JOIN verses v ON v.book_id = b.id
+      WHERE b.id = $1
+      GROUP BY b.id, b.testament_id, b.name, b.abbreviation;
+    `;
+    
+    const { rows } = await db.query(query, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Livro não encontrado.' });
+    }
+
+    return res.status(200).json(rows[0]);
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
 };

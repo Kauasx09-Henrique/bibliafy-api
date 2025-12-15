@@ -15,5 +15,6 @@ router.get('/books', bibleController.getAllBooks);
 router.get('/books/:book_id/chapters', bibleController.getChaptersByBook);
 router.get('/books/:book_id/chapters/:chapter', bibleController.getVersesByChapter);
 router.get('/verses/random', bibleController.getRandomVerse);
+router.get('/books/:id', bibleController.getBookById);
 
 module.exports = router;
