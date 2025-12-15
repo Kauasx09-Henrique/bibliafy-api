@@ -10,5 +10,5 @@ router.post('/reset-password', userController.resetPassword);
 
 router.put('/update', authMiddleware, userController.updateProfile);
 router.get('/check-nickname', authMiddleware, userController.checkNickname);
-
+router.put('/profile', authMiddleware, userController.updateProfile);
 module.exports = router;
