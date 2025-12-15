@@ -51,7 +51,7 @@ exports.getVersesByChapter = async (req, res) => {
 
   try {
     const query = `
-      SELECT v.verse, v.text
+      SELECT v.id, v.verse, v.text
       FROM verses v
       JOIN versions ver ON v.version_id = ver.id
       WHERE v.book_id = $1
@@ -91,15 +91,14 @@ exports.getRandomVerse = async (req, res) => {
     const { rows } = await db.query(query, [version]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ message: 'Nenhum versículo encontrado para a versão especificada.' });
+      return res.status(404).json({ message: 'Nenhum versículo encontrado.' });
     }
 
     return res.status(200).json(rows[0]);
   } catch (error) {
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
-}
-// ... (seus outros exports acima)
+};
 
 exports.getBookById = async (req, res) => {
   const { id } = req.params;
@@ -127,5 +126,33 @@ exports.getBookById = async (req, res) => {
     return res.status(200).json(rows[0]);
   } catch (error) {
     return res.status(500).json({ message: 'Erro interno do servidor.' });
+  }
+};
+
+exports.compareVerse = async (req, res) => {
+  const { verse_id } = req.params;
+  const { targetVersion } = req.query;
+
+  try {
+    const query = `
+      SELECT v2.text, ver.abbreviation as version
+      FROM verses v1
+      JOIN verses v2 ON 
+           v1.book_id = v2.book_id AND 
+           v1.chapter = v2.chapter AND 
+           v1.verse = v2.verse
+      JOIN versions ver ON v2.version_id = ver.id
+      WHERE v1.id = $1 AND ver.abbreviation = $2;
+    `;
+
+    const { rows } = await db.query(query, [verse_id, targetVersion]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Versão não encontrada para este versículo.' });
+    }
+
+    return res.status(200).json(rows[0]);
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro ao comparar.' });
   }
 };
