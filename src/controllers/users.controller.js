@@ -14,7 +14,6 @@ const transport = nodemailer.createTransport({
   }
 });
 
-
 exports.register = async (req, res) => {
   const { name, email, password, nickname, logo_url } = req.body;
 
@@ -137,6 +136,7 @@ exports.updateProfile = async (req, res) => {
     return res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
 
   } catch (error) {
+    console.error(error); // Adicionei console.error para facilitar debugging
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
@@ -145,8 +145,9 @@ exports.checkNickname = async (req, res) => {
   const userId = req.userId;
 
   try {
+    // --- CORREÇÃO AQUI: Adicionei logo_url no SELECT ---
     const { rows } = await db.query(
-      'SELECT id, name, email, nickname FROM users WHERE id = $1',
+      'SELECT id, name, email, nickname, logo_url FROM users WHERE id = $1',
       [userId]
     );
 
@@ -159,6 +160,10 @@ exports.checkNickname = async (req, res) => {
     return res.status(200).json({
       hasNickname: !!user.nickname,
       nickname: user.nickname || null,
+      
+      // --- CORREÇÃO AQUI: Retornando a logo para o front ---
+      logo_url: user.logo_url || null, 
+      
       suggestedNickname: user.nickname || user.name || user.email
     });
   } catch (error) {
@@ -206,7 +211,6 @@ exports.forgotPassword = async (req, res) => {
 `,
 
     });
-
 
     return res.status(200).json({ message: 'Email enviado com sucesso.' });
 
