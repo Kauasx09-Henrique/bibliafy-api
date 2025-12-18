@@ -4,16 +4,18 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+// Configuração do Nodemailer
 const transport = nodemailer.createTransport({
   host: process.env.MAIL_HOST || "smtp.gmail.com",
   port: process.env.MAIL_PORT || 587,
-  secure: false,
+  secure: false, // true para 465, false para outras portas
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS
   }
 });
 
+// --- 1. REGISTRO DE USUÁRIO ---
 exports.register = async (req, res) => {
   const { name, email, password, nickname, logo_url } = req.body;
 
@@ -53,6 +55,7 @@ exports.register = async (req, res) => {
   }
 };
 
+// --- 2. LOGIN ---
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -95,16 +98,13 @@ exports.login = async (req, res) => {
   }
 };
 
+// --- 3. ATUALIZAR PERFIL (Inclui Foto) ---
 exports.updateProfile = async (req, res) => {
-  const userId = req.userId; // Vem do middleware de autenticação
+  const userId = req.userId;
   const { name, password, nickname, logo_url } = req.body;
 
-  // DEBUG: Verificar se a imagem chegou no backend
-  if (logo_url) {
-    console.log(`[DEBUG] Recebendo logo_url para o user ${userId}. Tamanho: ${logo_url.length} caracteres.`);
-  } else {
-    console.log(`[DEBUG] Nenhuma logo_url enviada para o user ${userId}.`);
-  }
+  // Debug da imagem (opcional)
+  if (logo_url) console.log(`[DEBUG] Recebendo imagem para User ID: ${userId}`);
 
   if (!name && !password && !nickname && !logo_url) {
     return res.status(400).json({ message: 'Envie um dado para atualizar.' });
@@ -128,7 +128,6 @@ exports.updateProfile = async (req, res) => {
       passwordHash = await bcrypt.hash(password, salt);
     }
 
-    // A lógica COALESCE mantém o valor antigo se o novo for null
     await db.query(
       `
       UPDATE users SET 
@@ -139,13 +138,7 @@ exports.updateProfile = async (req, res) => {
         updated_at = NOW()
       WHERE id = $5
       `,
-      [
-        name || null,
-        nickname || null,
-        logo_url || null,
-        passwordHash,
-        userId
-      ]
+      [name || null, nickname || null, logo_url || null, passwordHash, userId]
     );
 
     return res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
@@ -156,32 +149,52 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+// --- 4. VERIFICAR DADOS DO USUÁRIO (Inclui Last Read) ---
 exports.checkNickname = async (req, res) => {
   const userId = req.userId;
-
   try {
+    // Busca nickname, logo e o progresso de leitura
     const { rows } = await db.query(
-      'SELECT id, name, email, nickname, logo_url FROM users WHERE id = $1',
+      'SELECT id, name, email, nickname, logo_url, last_read FROM users WHERE id = $1',
       [userId]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'Usuário não encontrado.' });
-    }
-
+    if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
     const user = rows[0];
 
     return res.status(200).json({
       hasNickname: !!user.nickname,
-      nickname: user.nickname || null,
-      logo_url: user.logo_url || null,
-      suggestedNickname: user.nickname || user.name || user.email
+      nickname: user.nickname,
+      logo_url: user.logo_url,
+      last_read: user.last_read, // Retorna o progresso salvo
+      suggestedNickname: user.nickname || user.name
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Erro interno do servidor.' });
+    return res.status(500).json({ message: 'Erro server' });
   }
 };
 
+// --- 5. SALVAR PROGRESSO DE LEITURA (Sincronização) ---
+exports.updateProgress = async (req, res) => {
+  const userId = req.userId;
+  const { bookId, bookName, chapter, version } = req.body;
+
+  try {
+    const lastReadData = JSON.stringify({ bookId, bookName, chapter, version });
+
+    await db.query(
+      'UPDATE users SET last_read = $1 WHERE id = $2',
+      [lastReadData, userId]
+    );
+
+    return res.status(200).json({ message: 'Progresso salvo.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erro ao salvar progresso.' });
+  }
+};
+
+// --- 6. RECUPERAÇÃO DE SENHA (Esqueci a senha) ---
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -226,6 +239,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// --- 7. REDEFINIR SENHA (Nova senha) ---
 exports.resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
@@ -255,46 +269,5 @@ exports.resetPassword = async (req, res) => {
 
   } catch (error) {
     return res.status(500).json({ message: 'Erro ao resetar senha.' });
-  }
-};
-exports.updateProgress = async (req, res) => {
-  const userId = req.userId;
-  const { bookId, bookName, chapter, version } = req.body;
-
-  try {
-    const lastReadData = JSON.stringify({ bookId, bookName, chapter, version });
-
-    await db.query(
-      'UPDATE users SET last_read = $1 WHERE id = $2',
-      [lastReadData, userId]
-    );
-
-    return res.status(200).json({ message: 'Progresso salvo.' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Erro ao salvar progresso.' });
-  }
-};
-
-exports.checkNickname = async (req, res) => {
-  const userId = req.userId;
-  try {
-    const { rows } = await db.query(
-      'SELECT id, name, email, nickname, logo_url, last_read FROM users WHERE id = $1',
-      [userId]
-    );
-
-    if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
-    const user = rows[0];
-
-    return res.status(200).json({
-      hasNickname: !!user.nickname,
-      nickname: user.nickname,
-      logo_url: user.logo_url,
-      last_read: user.last_read,
-      suggestedNickname: user.nickname || user.name
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Erro server' });
   }
 };
