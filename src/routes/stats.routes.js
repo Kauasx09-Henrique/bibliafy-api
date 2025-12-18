@@ -7,5 +7,6 @@ router.use(authMiddleware);
 
 router.post('/mark-read', statsController.markChapterRead);
 router.get('/', statsController.getUserStats);
+router.get('/badges', statsController.getBadges);
 
 module.exports = router;
