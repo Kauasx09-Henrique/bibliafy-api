@@ -257,3 +257,44 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({ message: 'Erro ao resetar senha.' });
   }
 };
+exports.updateProgress = async (req, res) => {
+  const userId = req.userId;
+  const { bookId, bookName, chapter, version } = req.body;
+
+  try {
+    const lastReadData = JSON.stringify({ bookId, bookName, chapter, version });
+
+    await db.query(
+      'UPDATE users SET last_read = $1 WHERE id = $2',
+      [lastReadData, userId]
+    );
+
+    return res.status(200).json({ message: 'Progresso salvo.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Erro ao salvar progresso.' });
+  }
+};
+
+exports.checkNickname = async (req, res) => {
+  const userId = req.userId;
+  try {
+    const { rows } = await db.query(
+      'SELECT id, name, email, nickname, logo_url, last_read FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+    const user = rows[0];
+
+    return res.status(200).json({
+      hasNickname: !!user.nickname,
+      nickname: user.nickname,
+      logo_url: user.logo_url,
+      last_read: user.last_read,
+      suggestedNickname: user.nickname || user.name
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Erro server' });
+  }
+};
