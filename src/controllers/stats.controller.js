@@ -1,12 +1,10 @@
 const db = require('../config/database');
 
-// 1. MARCAR CAPÍTULO COMO LIDO (E VERIFICAR CONQUISTA)
 exports.markChapterRead = async (req, res) => {
     const userId = req.userId;
     const { bookId, chapter } = req.body;
 
     try {
-        // A. Salva no histórico de leitura
         await db.query(
             `INSERT INTO reading_history (user_id, book_id, chapter)
        VALUES ($1, $2, $3)
@@ -14,8 +12,7 @@ exports.markChapterRead = async (req, res) => {
             [userId, bookId, chapter]
         );
 
-        // B. Verifica se completou o livro para ganhar o SELO
-        // (Usa a coluna total_chapters otimizada para ser rápido)
+
         const checkQuery = `
       SELECT 
         b.total_chapters as total,
@@ -26,15 +23,12 @@ exports.markChapterRead = async (req, res) => {
 
         const { rows } = await db.query(checkQuery, [bookId, userId]);
 
-        // Proteção caso o livro não exista ou total_chapters seja 0
         if (rows.length > 0) {
             const { total, lidos, book_name } = rows[0];
             let newBadge = null;
 
-            // Se leu tudo (lidos >= total), libera o selo!
             if (total > 0 && parseInt(lidos) >= parseInt(total)) {
 
-                // Insere na tabela de conquistas
                 const badgeInsert = await db.query(
                     `INSERT INTO completed_books (user_id, book_id) 
            VALUES ($1, $2) 
@@ -43,7 +37,6 @@ exports.markChapterRead = async (req, res) => {
                     [userId, bookId]
                 );
 
-                // Se inseriu uma linha nova, retorna o objeto badge para o frontend fazer a festa
                 if (badgeInsert.rows.length > 0) {
                     newBadge = {
                         bookId,
@@ -55,7 +48,7 @@ exports.markChapterRead = async (req, res) => {
 
             return res.status(200).json({
                 message: 'Leitura registrada.',
-                newBadge // Se não for null, o front exibe o confete e o popup
+                newBadge
             });
         }
 
@@ -72,8 +65,7 @@ exports.getUserStats = async (req, res) => {
     const userId = req.userId;
 
     try {
-        // Query otimizada: Pega o total_chapters direto da tabela books
-        // Não faz JOIN com verses, o que deixava o sistema lento
+
         const query = `
       SELECT 
         b.id, b.name, b.testament_id, 
@@ -87,7 +79,6 @@ exports.getUserStats = async (req, res) => {
 
         const { rows } = await db.query(query, [userId]);
 
-        // Calcula as porcentagens
         const stats = rows.map(book => ({
             ...book,
             progress: book.total_chapters > 0
@@ -95,7 +86,6 @@ exports.getUserStats = async (req, res) => {
                 : 0
         }));
 
-        // Cálculos gerais (Total lido vs Total bíblia)
         const totalChapters = stats.reduce((acc, curr) => acc + curr.total_chapters, 0);
         const totalRead = stats.reduce((acc, curr) => acc + curr.chapters_read, 0);
         const totalPercentage = totalChapters > 0 ? Math.round((totalRead / totalChapters) * 100) : 0;
@@ -111,7 +101,6 @@ exports.getUserStats = async (req, res) => {
     }
 };
 
-// 3. OBTER SELOS (CONQUISTAS)
 exports.getBadges = async (req, res) => {
     const userId = req.userId;
     try {

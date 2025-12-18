@@ -29,7 +29,6 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/bible', bibleRoutes);
 
-// Rotas protegidas
 app.use('/api/notes', authMiddleware, notesRoutes);
 app.use('/api/favorites', authMiddleware, favoritesRoutes);
 app.use('/api/stats', statsRoutes);

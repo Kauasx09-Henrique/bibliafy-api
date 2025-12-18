@@ -4,18 +4,16 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// Configuração do Nodemailer
 const transport = nodemailer.createTransport({
   host: process.env.MAIL_HOST || "smtp.gmail.com",
   port: process.env.MAIL_PORT || 587,
-  secure: false, // true para 465, false para outras portas
+  secure: false,
   auth: {
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS
   }
 });
 
-// --- 1. REGISTRO DE USUÁRIO ---
 exports.register = async (req, res) => {
   const { name, email, password, nickname, logo_url } = req.body;
 
@@ -55,7 +53,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// --- 2. LOGIN ---
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -98,12 +95,10 @@ exports.login = async (req, res) => {
   }
 };
 
-// --- 3. ATUALIZAR PERFIL (Inclui Foto) ---
 exports.updateProfile = async (req, res) => {
   const userId = req.userId;
   const { name, password, nickname, logo_url } = req.body;
 
-  // Debug da imagem (opcional)
   if (logo_url) console.log(`[DEBUG] Recebendo imagem para User ID: ${userId}`);
 
   if (!name && !password && !nickname && !logo_url) {
@@ -149,11 +144,9 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// --- 4. VERIFICAR DADOS DO USUÁRIO (Inclui Last Read) ---
 exports.checkNickname = async (req, res) => {
   const userId = req.userId;
   try {
-    // Busca nickname, logo e o progresso de leitura
     const { rows } = await db.query(
       'SELECT id, name, email, nickname, logo_url, last_read FROM users WHERE id = $1',
       [userId]
@@ -166,7 +159,7 @@ exports.checkNickname = async (req, res) => {
       hasNickname: !!user.nickname,
       nickname: user.nickname,
       logo_url: user.logo_url,
-      last_read: user.last_read, // Retorna o progresso salvo
+      last_read: user.last_read,
       suggestedNickname: user.nickname || user.name
     });
   } catch (error) {
@@ -194,7 +187,6 @@ exports.updateProgress = async (req, res) => {
   }
 };
 
-// --- 6. RECUPERAÇÃO DE SENHA (Esqueci a senha) ---
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -239,7 +231,6 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-// --- 7. REDEFINIR SENHA (Nova senha) ---
 exports.resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
