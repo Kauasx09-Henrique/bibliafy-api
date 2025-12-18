@@ -7,6 +7,7 @@ const userRoutes = require('./src/routes/users.routes');
 const bibleRoutes = require('./src/routes/bible.routes');
 const notesRoutes = require('./src/routes/notes.routes');
 const favoritesRoutes = require('./src/routes/favorites.routes');
+const statsRoutes = require('./src/routes/stats.routes');
 const authMiddleware = require('./src/config/middlewares/auth.middleware');
 
 const app = express();
@@ -31,6 +32,7 @@ app.use('/api/bible', bibleRoutes);
 // Rotas protegidas
 app.use('/api/notes', authMiddleware, notesRoutes);
 app.use('/api/favorites', authMiddleware, favoritesRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.listen(PORT, () => {
   console.log(`🔥 Servidor rodando na porta ${PORT}`);
