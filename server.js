@@ -14,11 +14,9 @@ const PORT = process.env.PORT || 3333;
 
 app.use(cors());
 
-// --- AQUI ESTÁ A CORREÇÃO ---
-// Aumentamos o limite para 10MB (ou mais se precisar) para caber a foto
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
-// ----------------------------
+
 
 app.get('/', (req, res) => {
   res.json({
