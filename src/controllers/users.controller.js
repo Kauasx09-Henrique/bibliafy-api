@@ -7,10 +7,10 @@ const nodemailer = require('nodemailer');
 const transport = nodemailer.createTransport({
   host: process.env.MAIL_HOST || "smtp.gmail.com",
   port: process.env.MAIL_PORT || 587,
-  secure: false, // TLS
+  secure: false,
   auth: {
     user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASS  // senha de app (não a senha normal)
+    pass: process.env.MAIL_PASS
   }
 });
 
@@ -48,6 +48,7 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Erro no registro:", error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
@@ -79,7 +80,6 @@ exports.login = async (req, res) => {
     );
 
     const needsNickname = !user.nickname;
-
     delete user.password_hash;
 
     return res.status(200).json({
@@ -90,13 +90,21 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Erro no login:", error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
 
 exports.updateProfile = async (req, res) => {
-  const userId = req.userId;
+  const userId = req.userId; // Vem do middleware de autenticação
   const { name, password, nickname, logo_url } = req.body;
+
+  // DEBUG: Verificar se a imagem chegou no backend
+  if (logo_url) {
+    console.log(`[DEBUG] Recebendo logo_url para o user ${userId}. Tamanho: ${logo_url.length} caracteres.`);
+  } else {
+    console.log(`[DEBUG] Nenhuma logo_url enviada para o user ${userId}.`);
+  }
 
   if (!name && !password && !nickname && !logo_url) {
     return res.status(400).json({ message: 'Envie um dado para atualizar.' });
@@ -120,6 +128,7 @@ exports.updateProfile = async (req, res) => {
       passwordHash = await bcrypt.hash(password, salt);
     }
 
+    // A lógica COALESCE mantém o valor antigo se o novo for null
     await db.query(
       `
       UPDATE users SET 
@@ -130,13 +139,19 @@ exports.updateProfile = async (req, res) => {
         updated_at = NOW()
       WHERE id = $5
       `,
-      [name || null, nickname || null, logo_url || null, passwordHash, userId]
+      [
+        name || null,
+        nickname || null,
+        logo_url || null,
+        passwordHash,
+        userId
+      ]
     );
 
     return res.status(200).json({ message: 'Perfil atualizado com sucesso!' });
 
   } catch (error) {
-    console.error(error); // Adicionei console.error para facilitar debugging
+    console.error("Erro ao atualizar perfil:", error);
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
@@ -145,7 +160,6 @@ exports.checkNickname = async (req, res) => {
   const userId = req.userId;
 
   try {
-    // --- CORREÇÃO AQUI: Adicionei logo_url no SELECT ---
     const { rows } = await db.query(
       'SELECT id, name, email, nickname, logo_url FROM users WHERE id = $1',
       [userId]
@@ -160,10 +174,7 @@ exports.checkNickname = async (req, res) => {
     return res.status(200).json({
       hasNickname: !!user.nickname,
       nickname: user.nickname || null,
-      
-      // --- CORREÇÃO AQUI: Retornando a logo para o front ---
-      logo_url: user.logo_url || null, 
-      
+      logo_url: user.logo_url || null,
       suggestedNickname: user.nickname || user.name || user.email
     });
   } catch (error) {
@@ -182,7 +193,6 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const token = crypto.randomBytes(20).toString('hex');
-
     const now = new Date();
     now.setHours(now.getHours() + 1);
 
@@ -194,22 +204,19 @@ exports.forgotPassword = async (req, res) => {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     await transport.sendMail({
-      to: email,              // <- vem do req.body.email
+      to: email,
       from: 'noreply@bibliafy.com',
       subject: 'Recuperação de Senha - Bibliafy',
       html: `
-  <div style="font-family: Arial, sans-serif; color: #333;">
-    <h2>Olá, ${user.rows[0].name}</h2>
-    <p>Recebemos uma solicitação para redefinir a senha da conta ligada a este e-mail: <strong>${email}</strong>.</p>
-    <p>Clique no botão abaixo para criar uma nova senha:</p>
-    <a href="${frontendUrl}/reset-password?token=${token}" 
-       style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-      Redefinir senha
-    </a>
-    <p>Este link é válido por <strong>1 hora</strong>. Se você não solicitou, pode ignorar este e-mail.</p>
-  </div>
-`,
-
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>Olá, ${user.rows[0].name}</h2>
+          <p>Recebemos uma solicitação para redefinir a senha: <strong>${email}</strong>.</p>
+          <a href="${frontendUrl}/reset-password?token=${token}" 
+             style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+            Redefinir senha
+          </a>
+        </div>
+      `,
     });
 
     return res.status(200).json({ message: 'Email enviado com sucesso.' });

@@ -9,13 +9,16 @@ const notesRoutes = require('./src/routes/notes.routes');
 const favoritesRoutes = require('./src/routes/favorites.routes');
 const authMiddleware = require('./src/config/middlewares/auth.middleware');
 
-
-
 const app = express();
 const PORT = process.env.PORT || 3333;
 
 app.use(cors());
-app.use(express.json());
+
+// --- AQUI ESTÁ A CORREÇÃO ---
+// Aumentamos o limite para 10MB (ou mais se precisar) para caber a foto
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
+// ----------------------------
 
 app.get('/', (req, res) => {
   res.json({
@@ -27,9 +30,9 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/bible', bibleRoutes);
 
+// Rotas protegidas
 app.use('/api/notes', authMiddleware, notesRoutes);
 app.use('/api/favorites', authMiddleware, favoritesRoutes);
-
 
 app.listen(PORT, () => {
   console.log(`🔥 Servidor rodando na porta ${PORT}`);
