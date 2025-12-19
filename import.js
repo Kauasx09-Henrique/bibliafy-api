@@ -2,9 +2,10 @@ const fs = require("fs");
 const { Pool } = require("pg");
 require('dotenv').config();
 
+// CONFIGURAÇÃO PARA RODAR DENTRO DA RENDER
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  connectionString: process.env.DATABASE_URL, // A Render preenche isso sozinha lá dentro
+  ssl: { rejectUnauthorized: false }          // A Render EXIGE isso para funcionar
 });
 
 const booksMap = {
@@ -36,13 +37,11 @@ async function importVersion(jsonFile) {
     }
 
     const books = JSON.parse(rawData);
-    console.log(`Arquivo lido! Processando ${books.length} livros...`);
+    console.log(`Arquivo lido! Processando ${books.length} livros para Versão AA...`);
 
-    // CONFIGURAÇÃO: ID DA VERSÃO ACF = 2
-    const TARGET_VERSION_ID = 2; 
+    const TARGET_VERSION_ID = 3; 
 
     for (const book of books) {
-        // Tenta achar o ID do livro usando a sigla (ex: "gn")
         const abbrev = (book.abbrev || book.book_id || "").toLowerCase();
         const bookId = booksMap[abbrev];
 
@@ -65,10 +64,10 @@ async function importVersion(jsonFile) {
                 );
             }
         }
-        console.log(`Livro ID ${bookId} (${abbrev}) importado.`);
+        console.log(`Livro ID ${bookId} (${abbrev}) importado para AA.`);
     }
 
-    console.log("SUCESSO! Importação da ACF concluída.");
+    console.log("SUCESSO! Importação da AA concluída.");
 
   } catch (error) {
     console.error("Erro Fatal:", error.message);
