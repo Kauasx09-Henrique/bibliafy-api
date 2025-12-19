@@ -33,38 +33,38 @@ async function importVersion(jsonFile) {
 
     const lastBracket = rawData.lastIndexOf(']');
     if (lastBracket !== -1 && lastBracket < rawData.length - 1) {
-        rawData = rawData.substring(0, lastBracket + 1);
+      rawData = rawData.substring(0, lastBracket + 1);
     }
 
     const books = JSON.parse(rawData);
     console.log(`Arquivo lido! Processando ${books.length} livros para Versão AA...`);
 
-    const TARGET_VERSION_ID = 3; 
+    const TARGET_VERSION_ID = 3;
 
     for (const book of books) {
-        const abbrev = (book.abbrev || book.book_id || "").toLowerCase();
-        const bookId = booksMap[abbrev];
+      const abbrev = (book.abbrev || book.book_id || "").toLowerCase();
+      const bookId = booksMap[abbrev];
 
-        if (!bookId) {
-            console.log(`Pular livro: Sigla '${abbrev}' não encontrada no mapa.`);
-            continue;
-        }
+      if (!bookId) {
+        console.log(`Pular livro: Sigla '${abbrev}' não encontrada no mapa.`);
+        continue;
+      }
 
-        if (!book.chapters || !Array.isArray(book.chapters)) continue;
+      if (!book.chapters || !Array.isArray(book.chapters)) continue;
 
-        for (let c = 0; c < book.chapters.length; c++) {
-            const versesArray = book.chapters[c];
-            for (let v = 0; v < versesArray.length; v++) {
-                const text = typeof versesArray[v] === 'string' ? versesArray[v] : versesArray[v].text;
-                
-                await pool.query(
-                    `INSERT INTO verses (book_id, chapter, verse, text, version_id)
+      for (let c = 0; c < book.chapters.length; c++) {
+        const versesArray = book.chapters[c];
+        for (let v = 0; v < versesArray.length; v++) {
+          const text = typeof versesArray[v] === 'string' ? versesArray[v] : versesArray[v].text;
+
+          await pool.query(
+            `INSERT INTO verses (book_id, chapter, verse, text, version_id)
                      VALUES ($1, $2, $3, $4, $5)`,
-                    [bookId, c + 1, v + 1, text, TARGET_VERSION_ID]
-                );
-            }
+            [bookId, c + 1, v + 1, text, TARGET_VERSION_ID]
+          );
         }
-        console.log(`Livro ID ${bookId} (${abbrev}) importado para AA.`);
+      }
+      console.log(`Livro ID ${bookId} (${abbrev}) importado para AA.`);
     }
 
     console.log("SUCESSO! Importação da AA concluída.");
